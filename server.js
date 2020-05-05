@@ -37,6 +37,8 @@ app.get("/", (req, res) => {
     res.render("index", {
       number: req.session.user.number,
       brand: smsProxy.brand,
+      drivers: users.filter((user) => user.role === "driver"),
+      role: req.session.user.role,
     });
   }
 });
@@ -92,6 +94,7 @@ app.post("/check-code", async (req, res) => {
               */
       req.session.user = {
         number: user.number,
+        role: user.role,
       };
     }
     res.redirect("/");
@@ -107,17 +110,17 @@ app.get("/logout", (req, res) => {
 });
 
 app.post("/chat", (req, res) => {
-  const userANumber = req.body.userANumber;
-  const userBNumber = req.body.userBNumber;
+  const user = req.body.user;
+  const driver = req.body.driver;
 
-  smsProxy.createChat(userANumber, userBNumber, (err, result) => {
+  smsProxy.createChat(user, driver, (err, result) => {
     if (err) {
       res.status(500).json(err);
     } else {
       res.json(result);
     }
   });
-  res.send("OK");
+  res.send("You can start chatting now");
 });
 
 app.get("/webhooks/inbound-sms", (req, res) => {

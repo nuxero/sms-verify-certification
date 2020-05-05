@@ -4,6 +4,13 @@ block content
     h1 Welcome to #{brand}!
     if number
         p You are logged in using number: #{number}
+        if role === 'user'
+            form(action='/chat', method='post')
+                input(type='hidden', name='user', value=number)
+                select.ghost-input(name='driver')
+                    each driver in drivers
+                        option(value=driver.number) #{driver.firstname} #{driver.lastname}
+                input.ghost-button(type='submit', value='Contact')
         a(href="logout")
             button.ghost-button(type="button") Logout
     else
