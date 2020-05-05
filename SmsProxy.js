@@ -9,7 +9,7 @@ class SmsProxy {
       }
     );
     this.brand = process.env.NEXMO_BRAND_NAME;
-    this.chats = {};
+    this.chats = [];
   }
 
   _sendSms(from, to, message) {

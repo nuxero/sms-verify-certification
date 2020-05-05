@@ -4,5 +4,10 @@ block content
     h1 Log in: Step 1
     fieldset
         form(action='/verify', method='post')
+            input.ghost-input(name='firstname', type='text', placeholder='First Name', required='')
+            input.ghost-input(name='lastname', type="text", placeholder='Last Name', required='')
             input.ghost-input(name='number', type='text', placeholder='Enter your mobile number', required='')
+            select.ghost-input(name='role', required='')
+                each val, key in {'user': 'User', 'driver': 'Driver'}
+                    option(value=key) #{val}
             input.ghost-button(type='submit', value='Get Verification Code')
