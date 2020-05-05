@@ -8,11 +8,7 @@ const SmsProxy = require("./SmsProxy");
 const app = express();
 const smsProxy = new SmsProxy();
 
-let drivers = [];
-let users = [];
-
-let verifyRequestId = null;
-let verifyRequestNumber = null;
+let users = Array();
 
 app.use(express.static("public"));
 
@@ -52,16 +48,27 @@ app.get("/login", (req, res) => {
 
 app.post("/verify", async (req, res) => {
   // Start the verification process
-  verifyRequestNumber = req.body.number;
+  const user = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    number: req.body.number,
+    role: req.body.role,
+  };
+
   try {
-    const result = await smsProxy.requestCode(verifyRequestNumber);
-    verifyRequestId = result;
-    console.log(`request_id: ${verifyRequestId}`);
+    const result = await smsProxy.requestCode(user.number);
+    user.verifyRequestId = result;
+
+    // saves the user
+    users.push(user);
+    console.log(`request_id: ${user.verifyRequestId}`);
     /* 
         Redirect to page where the user can 
         enter the code that they received
      */
-    res.render("entercode");
+    res.render("entercode", {
+      requestid: user.verifyRequestId,
+    });
   } catch (err) {
     console.error(err);
   }
@@ -69,9 +76,13 @@ app.post("/verify", async (req, res) => {
 
 app.post("/check-code", async (req, res) => {
   // Check the code provided by the user
+  const user = users.filter(
+    (user) => user.verifyRequestId === req.body.requestid
+  )[0];
+
   try {
     const result = await smsProxy.checkVerificationCode(
-      verifyRequestId,
+      req.body.requestid,
       req.body.code
     );
     if (result.status == 0) {
@@ -80,7 +91,7 @@ app.post("/check-code", async (req, res) => {
                   so create a session for that user
               */
       req.session.user = {
-        number: verifyRequestNumber,
+        number: user.number,
       };
     }
     res.redirect("/");
@@ -90,6 +101,7 @@ app.post("/check-code", async (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
+  users = users.filter((user) => user.number != req.session.user.number);
   req.session.destroy();
   res.redirect("/");
 });

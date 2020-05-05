@@ -4,5 +4,6 @@ block content
     h1 Log in: Step 2
     fieldset
         form(action='/check-code', method='post')
+            input(name='requestid', type='hidden', value=requestid)
             input.ghost-input(name='code', type='text', placeholder='Enter your verification code', required='')
             input.ghost-button(type='submit', value='Verify me!')
